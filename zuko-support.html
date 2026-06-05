@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ずこうのとも🎨</title>
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:#FFF8F0; --orange:#FF7043; --mint:#81C784;
+  --sky:#4FC3F7; --purple:#CE93D8; --brown:#8D6E63; --dark:#3E2723;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background-color:var(--cream);
+  font-family:'M PLUS Rounded 1c',sans-serif;
+  min-height:100vh; overflow-x:hidden;
+}
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:
+    radial-gradient(circle at 10% 10%,rgba(255,213,79,.25) 0%,transparent 40%),
+    radial-gradient(circle at 90% 20%,rgba(79,195,247,.2) 0%,transparent 35%),
+    radial-gradient(circle at 80% 80%,rgba(244,143,177,.2) 0%,transparent 40%),
+    radial-gradient(circle at 20% 85%,rgba(129,199,132,.2) 0%,transparent 35%);
+  pointer-events:none; z-index:0;
+}
+
+/* ルビ共通 */
+ruby { ruby-align:center; }
+rt {
+  font-size:0.55em;
+  font-weight:700;
+  color:var(--brown);
+  letter-spacing:0.02em;
+}
+
+/* 浮かぶ図形 */
+.floating-shapes { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+.shape { position:absolute; opacity:.18; animation:floatAround linear infinite; }
+@keyframes floatAround {
+  0%  { transform:translateY(0) rotate(0deg); }
+  50% { transform:translateY(-20px) rotate(180deg); }
+  100%{ transform:translateY(0) rotate(360deg); }
+}
+
+/* ヘッダー */
+header { position:relative; z-index:10; text-align:center; padding:36px 20px 20px; }
+.logo {
+  display:inline-flex; align-items:center; gap:10px;
+  background:white; border-radius:60px; padding:14px 32px;
+  box-shadow:0 6px 24px rgba(0,0,0,.1); border:3px solid var(--dark);
+  animation:popIn .6s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes popIn { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
+.logo-icon { font-size:2.2rem; }
+.logo-text { font-family:'Kaisei Decol',serif; font-size:1.8rem; font-weight:700; color:var(--dark); }
+.tagline { margin-top:12px; font-size:1rem; color:var(--brown); font-weight:700; }
+
+/* コンテナ */
+.container { position:relative; z-index:10; max-width:820px; margin:0 auto; padding:0 20px 60px; }
+@keyframes fadeUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+.section-title {
+  text-align:center; font-size:1.1rem; font-weight:800;
+  color:var(--brown); margin:32px 0 16px; letter-spacing:.04em;
+}
+
+/* スタート／ヒント画面 */
+#screen-start { display:block; animation:fadeUp .5s ease both; }
+#screen-hints { display:none; }
+
+/* 問題グリッド */
+.problem-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+@media(min-width:520px){ .problem-grid{ grid-template-columns:repeat(3,1fr); } }
+
+.problem-card {
+  background:white; border-radius:22px; padding:20px 12px 16px;
+  text-align:center; cursor:pointer; border:3px solid transparent;
+  box-shadow:0 4px 14px rgba(0,0,0,.08);
+  transition:transform .18s,border-color .18s,box-shadow .18s;
+  user-select:none; animation:fadeUp .5s ease both;
+  line-height:1.6;
+}
+.problem-card:hover { transform:translateY(-4px) scale(1.03); box-shadow:0 10px 28px rgba(0,0,0,.13); }
+.problem-card.selected { border-color:var(--orange); box-shadow:0 6px 20px rgba(255,112,67,.3); transform:scale(1.04); }
+.problem-card .card-emoji { font-size:2.4rem; display:block; margin-bottom:8px; }
+.problem-card .card-label { font-size:0.82rem; font-weight:800; color:var(--dark); line-height:1.7; }
+
+/* 気持ちボタン列 */
+.mood-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.mood-btn {
+  background:white; border:3px solid transparent; border-radius:50px;
+  padding:10px 20px;
+  font-family:'M PLUS Rounded 1c',sans-serif;
+  font-size:0.88rem; font-weight:800; cursor:pointer;
+  display:flex; align-items:center; gap:6px;
+  box-shadow:0 4px 12px rgba(0,0,0,.07);
+  transition:transform .18s,border-color .18s;
+  line-height:1.6;
+}
+.mood-btn:hover { transform:scale(1.06); }
+.mood-btn.selected { border-color:var(--orange); background:#FFF3EE; }
+
+/* ヒントをみるボタン */
+.go-btn {
+  display:block; margin:28px auto 0;
+  background:var(--orange); color:white;
+  border:3px solid var(--dark); border-radius:60px; padding:18px 48px;
+  font-family:'M PLUS Rounded 1c',sans-serif;
+  font-size:1.2rem; font-weight:800; cursor:pointer;
+  box-shadow:0 6px 0 var(--dark);
+  transition:transform .12s,box-shadow .12s;
+}
+.go-btn:hover { transform:translateY(-3px); box-shadow:0 9px 0 var(--dark); }
+.go-btn:active { transform:translateY(3px); box-shadow:0 3px 0 var(--dark); }
+.go-btn:disabled { opacity:.4; cursor:default; transform:none; box-shadow:0 6px 0 var(--dark); }
+
+/* ヒント画面 */
+.hints-header { text-align:center; margin:24px 0 20px; }
+.hints-title { font-family:'Kaisei Decol',serif; font-size:1.5rem; font-weight:700; color:var(--dark); line-height:1.8; }
+.hints-sub { font-size:0.9rem; color:var(--brown); margin-top:6px; font-weight:700; }
+
+/* ローディング */
+.loading { text-align:center; padding:40px; font-size:1.1rem; font-weight:800; color:var(--brown); }
+.loading span { display:inline-block; animation:bounce .6s ease infinite alternate; }
+.loading span:nth-child(2){ animation-delay:.1s; }
+.loading span:nth-child(3){ animation-delay:.2s; }
+@keyframes bounce { from{transform:translateY(0)} to{transform:translateY(-8px)} }
+
+/* 応援ボックス */
+.cheer-box {
+  background:linear-gradient(135deg,#E8F5E9,#F1F8E9);
+  border:3px solid var(--mint); border-radius:24px; padding:22px 24px;
+  text-align:center; box-shadow:0 4px 16px rgba(129,199,132,.25);
+  animation:fadeUp .4s ease both;
+}
+.cheer-box .cheer-emoji { font-size:2.4rem; }
+.cheer-box .cheer-text { font-size:1rem; font-weight:800; color:var(--dark); margin-top:10px; line-height:2; }
+
+/* ヒントリスト */
+.hints-list { display:flex; flex-direction:column; gap:16px; margin-top:8px; }
+.hint-card {
+  background:white; border-radius:24px; padding:22px 24px;
+  border:3px solid transparent; box-shadow:0 4px 16px rgba(0,0,0,.08);
+  display:flex; gap:16px; align-items:flex-start;
+  animation:fadeUp .4s ease both; cursor:pointer;
+  transition:transform .18s,box-shadow .18s;
+}
+.hint-card:hover { transform:translateX(4px); box-shadow:0 8px 24px rgba(0,0,0,.12); }
+.hint-card.opened { border-left:6px solid var(--orange); }
+.hint-num {
+  min-width:44px; height:44px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.3rem; font-weight:800; border:3px solid var(--dark); flex-shrink:0;
+}
+.hint-body { flex:1; }
+.hint-title { font-size:1rem; font-weight:800; color:var(--dark); margin-bottom:6px; line-height:1.8; }
+.hint-text { font-size:0.88rem; color:#555; line-height:2; display:none; }
+.hint-card.opened .hint-text { display:block; }
+.hint-toggle { font-size:0.8rem; color:var(--orange); font-weight:800; margin-top:6px; }
+
+/* ランダムお題 */
+.random-card {
+  background:linear-gradient(135deg,#FFF9C4,#FFECB3);
+  border:3px solid var(--dark); border-radius:24px; padding:24px;
+  text-align:center; box-shadow:0 6px 0 var(--dark); margin-top:8px;
+  animation:fadeUp .4s ease both;
+}
+.random-card .rcard-label { font-size:0.85rem; font-weight:800; color:var(--brown); margin-bottom:10px; }
+.random-card .rcard-content {
+  font-family:'Kaisei Decol',serif; font-size:1.35rem; font-weight:700;
+  color:var(--dark); line-height:2; min-height:52px;
+  display:flex; align-items:center; justify-content:center;
+}
+.random-card .rcard-btn {
+  display:inline-block; margin-top:14px; background:var(--dark); color:white;
+  border:none; border-radius:40px; padding:10px 28px;
+  font-family:'M PLUS Rounded 1c',sans-serif; font-size:0.9rem; font-weight:800;
+  cursor:pointer; transition:opacity .15s;
+}
+.random-card .rcard-btn:hover { opacity:.75; }
+
+/* 戻るボタン */
+.back-btn {
+  display:block; margin:28px auto 0; width:fit-content;
+  background:white; border:3px solid var(--dark); border-radius:40px;
+  padding:10px 28px; font-family:'M PLUS Rounded 1c',sans-serif;
+  font-size:0.9rem; font-weight:800; cursor:pointer;
+  box-shadow:0 4px 0 var(--dark); transition:transform .12s,box-shadow .12s;
+}
+.back-btn:hover { transform:translateY(-2px); box-shadow:0 6px 0 var(--dark); }
+.back-btn:active { transform:translateY(2px); box-shadow:0 2px 0 var(--dark); }
+</style>
+</head>
+<body>
+
+<div class="floating-shapes" aria-hidden="true">
+  <div class="shape" style="top:8%;left:5%;font-size:2.5rem;animation-duration:7s;">⭐</div>
+  <div class="shape" style="top:15%;right:8%;font-size:3rem;animation-duration:9s;">🔴</div>
+  <div class="shape" style="top:40%;left:3%;font-size:2rem;animation-duration:11s;animation-delay:2s;">🔵</div>
+  <div class="shape" style="top:65%;right:5%;font-size:2.8rem;animation-duration:8s;animation-delay:1s;">🟡</div>
+  <div class="shape" style="top:80%;left:10%;font-size:2rem;animation-duration:10s;animation-delay:3s;">🟢</div>
+  <div class="shape" style="top:30%;right:3%;font-size:1.8rem;animation-duration:12s;animation-delay:1.5s;">🟣</div>
+</div>
+
+<header>
+  <div class="logo">
+    <span class="logo-icon">🎨</span>
+    <span class="logo-text">ずこうのとも</span>
+  </div>
+  <p class="tagline">✨ <ruby>手<rt>て</rt></ruby>がとまったら、ここでヒントをもらおう！ ✨</p>
+</header>
+
+<div class="container">
+
+  <!-- スタート画面 -->
+  <div id="screen-start">
+    <p class="section-title">🤔 どこでとまってる？</p>
+    <div class="problem-grid" id="problem-grid"></div>
+
+    <p class="section-title" style="margin-top:28px;">💭 いまどんなきもち？</p>
+    <div class="mood-row" id="mood-row"></div>
+
+    <button class="go-btn" id="go-btn" disabled onclick="showHints()">
+      🔮 ヒントをみる！
+    </button>
+  </div>
+
+  <!-- ヒント画面 -->
+  <div id="screen-hints">
+    <div class="hints-header">
+      <div class="hints-title" id="hints-title">💡 ヒントだよ！</div>
+      <div class="hints-sub" id="hints-sub">タップしてくわしくみよう</div>
+    </div>
+    <div id="hints-container">
+      <div class="loading"><span>✨</span><span>かんがえ</span><span>てるよ…</span></div>
+    </div>
+    <button class="back-btn" onclick="goBack()">← もどる</button>
+  </div>
+
+</div>
+
+<script>
+// ===== データ =====
+const PROBLEMS = [
+  { id:'nani',    emoji:'😶', label:'なにをかけば<br>いいかわからない' },
+  { id:'iro',     emoji:'🎨', label:'いろのえらびかたが<br>わからない' },
+  { id:'katachi', emoji:'🔷', label:'かたちがうまく<br>かけない' },
+  { id:'hajime',  emoji:'🚀', label:'どこからはじめれば<br>いいかわからない' },
+  { id:'idea',    emoji:'💡', label:'アイデアが<br>うかばない' },
+  { id:'zannen',  emoji:'😢', label:'かいてみたけど<br>なんかちがう…' },
+];
+const MOODS = [
+  { id:'wakatanai', emoji:'😵', label:'ぜんぜんわからない' },
+  { id:'sukoshi',   emoji:'🤏', label:'すこしわかるけど…' },
+  { id:'tanoshii',  emoji:'😄', label:'たのしいのにとまった！' },
+  { id:'kowai',     emoji:'😰', label:'うまくいくかしんぱい…' },
+];
+
+let selectedProblem = null;
+let selectedMood    = null;
+
+// ===== 初期化 =====
+document.addEventListener('DOMContentLoaded', () => {
+  const pg = document.getElementById('problem-grid');
+  PROBLEMS.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'problem-card';
+    el.style.animationDelay = (i * 0.07) + 's';
+    el.innerHTML = '<span class="card-emoji">' + p.emoji + '</span>'
+                 + '<span class="card-label">' + p.label + '</span>';
+    el.addEventListener('click', () => {
+      selectedProblem = p.id;
+      document.querySelectorAll('.problem-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      updateGoBtn();
+    });
+    pg.appendChild(el);
+  });
+
+  const mr = document.getElementById('mood-row');
+  MOODS.forEach((m, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'mood-btn';
+    btn.style.animationDelay = (i * 0.07) + 's';
+    btn.innerHTML = m.emoji + ' ' + m.label;
+    btn.addEventListener('click', () => {
+      selectedMood = m.id;
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateGoBtn();
+    });
+    mr.appendChild(btn);
+  });
+});
+
+function updateGoBtn() {
+  document.getElementById('go-btn').disabled = !(selectedProblem && selectedMood);
+}
+
+// ===== 画面切替 =====
+function showScreen(id) {
+  document.getElementById('screen-start').style.display = (id === 'start') ? 'block' : 'none';
+  document.getElementById('screen-hints').style.display = (id === 'hints') ? 'block' : 'none';
+}
+
+// ===== ヒント画面へ =====
+async function showHints() {
+  showScreen('hints');
+  const prob = PROBLEMS.find(p => p.id === selectedProblem);
+  const mood = MOODS.find(m => m.id === selectedMood);
+  document.getElementById('hints-title').innerHTML = prob.emoji + ' ' + prob.label;
+  document.getElementById('hints-sub').textContent = 'きもち: ' + mood.emoji + ' ' + mood.label;
+
+  const container = document.getElementById('hints-container');
+  container.innerHTML = '<div class="loading"><span>✨</span><span>ヒントを</span><span>かんがえてるよ…</span></div>';
+
+  let parsed = null;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1200,
+        system: 'あなたは小学校の図工の先生です。返答はJSONのみ（コードブロック・前置き不要）。すべての文章はひらがなとカタカナを中心に書き、漢字を使う場合は必ずHTMLのrubyタグでふりがなをつけてください（例: 絵）。形式:{"cheer":"応援メッセージ（絵文字付き30字以内）","hints":[{"title":"タイトル（絵文字1つで始まる15字以内）","text":"説明（60〜100字の子供向け）","color":"#xxxxxx"}],"randomIdea":"お題（20字以内）"}。hintsは必ず3つ。',
+        messages: [{ role: 'user', content: buildPrompt(prob, mood) }]
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const text = data.content.map(b => b.text || '').join('').replace(/```[^\n]*\n?|```/g,'').trim();
+      parsed = JSON.parse(text);
+    }
+  } catch(e) { /* フォールバックへ */ }
+
+  if (!parsed) parsed = getFallback(selectedProblem, selectedMood);
+  renderHints(parsed);
+}
+
+// ===== もどる =====
+function goBack() {
+  showScreen('start');
+  document.getElementById('problem-grid').style.display = 'grid';
+  document.getElementById('mood-row').style.display = 'flex';
+  selectedProblem = null; selectedMood = null;
+  document.querySelectorAll('.problem-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  updateGoBtn();
+}
+
+// ===== プロンプト =====
+function buildPrompt(prob, mood) {
+  const pm = {nani:'なにをかけばいいかわからない',iro:'いろのえらびかたがわからない',katachi:'かたちがうまくかけない',hajime:'どこからはじめればいいかわからない',idea:'アイデアがうかばない',zannen:'かいてみたけどなんかちがう'};
+  const mm = {wakatanai:'ぜんぜんわからなくてこまっている',sukoshi:'すこしわかるけどまよっている',tanoshii:'たのしいのにてがとまっている',kowai:'うまくいくかふあんでしんぱいしている'};
+  return 'こどもが「' + pm[prob.id] + '」でこまっています。きもちは「' + mm[mood.id] + '」です。ぴったりなヒント3つ・おうえんメッセージ・ランダムなおだいをおしえてください。';
+}
+
+// ===== フォールバック =====
+// ★ ルビはHTML文字列で記述（escせずにinnerHTMLで挿入）
+function r(kanji, yomi) { return '' + kanji + ''; }
+
+function getFallback(probId, moodId) {
+  const R = arr => arr[Math.floor(Math.random() * arr.length)];
+
+  const db = {
+    nani: {
+      cheers: [
+        '✨ なにをかいてもOK！' + r('自由','じゆう') + 'にやってみよう！',
+        '🎨 きみだけの' + r('絵','え') + 'をかこう！せいかいなんてないよ！',
+        '🌟 おもいついたものをなんでもかいていいんだよ！',
+        '💫 しろい' + r('紙','かみ') + 'はきみのステージ！なんでもアリだよ！',
+      ],
+      ideas: [
+        r('空','そら') + 'からおちてきたふしぎなもの🌂',
+        'きょうのごはんをおいしそうに🍱',
+        'すきなどうぶつのひみつきち🐾',
+        'ゆめでみたふしぎなばしょ🌙',
+        'じぶんのすきなものぜんぶあつめた' + r('絵','え') + '🎒',
+        'いちばんたいせつなたからもの💎',
+        'まほうがつかえるとしたら🪄',
+      ],
+      sets: [
+        [
+          {title:'🔍 まわりをみまわそう', text:'きょうしつのなか、まど、つくえ…めについたものをそのままかいてみよう。ちいさなものでも、よくみるとおもしろいかたちがあるよ！', color:'#FF7043'},
+          {title:'💭 すきなものをおもいうかべて', text:'すきなたべもの、どうぶつ、キャラクター。「すき！」とおもうものをいくつかかきだして、そのなかからえらんでみよう。', color:'#4FC3F7'},
+          {title:'🎲 てをうごかしてみよう', text:'かんがえるまえにまずせんを1ぽんだけひいてみよう。そのせんがなにかにみえてくることがあるよ。かんがえすぎなくて大丈夫！', color:'#81C784'},
+        ],[
+          {title:'🗓️ きょうあったことをかこう', text:'あさごはん、とうこう、やすみじかん…きょうじぶんにおきたことをひとつえらんでえにしてみよう。にっきみたいでたのしいよ！', color:'#FF7043'},
+          {title:'🌈 すきないろだけでかこう', text:'まず「いちばんすきないろ」をひとつきめて、そのいろだけでなんでもかいてみよう。いつもとちがうはっけんがあるよ。', color:'#CE93D8'},
+          {title:'🔢 3つのものをかこう', text:'「のりもの」「たべもの」「いきもの」など、3つのものをかみにならべてかくだけでも立派なえになるよ！', color:'#FFD54F'},
+        ],[
+          {title:'🤲 てのひらをつかおう', text:'じぶんのてをじっくりみてみよう。てをかみにおいてなぞるだけで、そこからいろんなえにひろげられるよ！', color:'#FF7043'},
+          {title:'🌀 グルグルからはじめよう', text:'かみにぐるぐるとまるをいくつかかいてみよう。そのまるがどんなものにみえるかそうぞうして、たしたりかきたしたりしよう。', color:'#4FC3F7'},
+          {title:'📖 すきなほんやゲームから', text:'すきなおはなしやゲームの「すきなシーン」をおもいうかべてかいてみよう。ストーリーがあるとかきやすいよ！', color:'#81C784'},
+        ],[
+          {title:'🌤️ そとのけしきをかこう', text:'まどからみえるそら、き、たてもの…そとをながめてみよう。けしきのなかで「いちばんきになるもの」をえらんでかいてみよう！', color:'#4FC3F7'},
+          {title:'🐾 いきものをしゅやくに', text:'いぬ、ねこ、ちょう、きんぎょ…すきないきものをおもいうかべてみよう。そのいきものが「なにかをしているばめん」をかくとおもしろいよ！', color:'#81C784'},
+          {title:'🏠 じぶんのいえをかこう', text:'じぶんのへややリビングをそのままかいてみよう。しっているばしょだからかきやすいし、おもいでにもなるよ！', color:'#FFD54F'},
+        ],[
+          {title:'🍭 たべものをしゅやくに', text:'すきなたべものをひとつえらんで、おいしそうにかいてみよう。いろやかたちをよくみてていねいにかくと、ほんものみたいになるよ！', color:'#FF7043'},
+          {title:'🌟 ゆめのせかいをかこう', text:'「こんなばしょがあったらいいな」とおもうばしょをそうぞうしてかいてみよう。そらとぶしまでも、うみのなかのしろでも、なんでもOK！', color:'#CE93D8'},
+          {title:'👟 じぶんのもちものをかこう', text:'ランドセル、くつ、ふでばこ…まいにちつかっているものをよくみてかいてみよう。よくみるとおもしろいかたちをしているよ。', color:'#4FC3F7'},
+        ],
+      ],
+    },
+
+    iro: {
+      cheers: [
+        '🌈 いろえらびをたのしもう！まちがいなんてないよ！',
+        '🎨 どんないろでもOK！きみのかんじたいろをつかおう！',
+        '✨ いろはきみのきもちをあらわすものだよ！',
+        '🖌️ いろをまぜるとあたらしいはっけんがあるよ！',
+      ],
+      ideas: [
+        'ゆうやけのそら🌅',
+        'あめあがりのにじ🌈',
+        'あおいうみとしろいなみ🌊',
+        'はるのおはなばたけ🌸',
+        'ゆきのつもったもり⛄',
+        'あかとあおときいろだけのえ🔴',
+        'にじいろのどうぶつ🐘',
+      ],
+      sets: [
+        [
+          {title:'🍊 すきないろからはじめよう', text:'まずいちばんすきないろをえらんで、それにあういろを2〜3いろくわえていくと、しぜんにまとまりがでてくるよ。', color:'#FF7043'},
+          {title:'🌿 となりのいろをつかおう', text:'あか→オレンジ→きいろのように、いろのわっかでとなりどうしのいろはあいしょうバッチリ！ためしてみてね。', color:'#81C784'},
+          {title:'⬛ くろやしろをすこしまぜて', text:'どんないろでも、すこしだけくろをまぜると「しまったいろ」、しろをまぜると「やわらかいいろ」になるよ。', color:'#CE93D8'},
+        ],[
+          {title:'💧 みずをつかってみよう', text:'えのぐにみずをおおめにまぜると、ふわっとしたいろになるよ。みずのりょうでぜんぜんちがういろあいがたのしめるんだ！', color:'#4FC3F7'},
+          {title:'🎭 はんたいのいろをつかってみよう', text:'あかとみどり、あおとオレンジのように、はんたいのいろをちかくにおくと、おたがいがぱっとめだってきれいにみえるよ！', color:'#FF7043'},
+          {title:'🌤️ はいけいのいろをさきにきめよう', text:'まずはいけい（うしろのいろ）をさきにぬってみよう。はいけいがきまると、しゅやくのいろがえらびやすくなるよ。', color:'#FFD54F'},
+        ],[
+          {title:'🍃 しぜんのいろをまねしよう', text:'そら、くさ、つち、き…しぜんのものをよくみると、ひとついろでもいろんないろがまじっているよ。よくかんさつしてまねしてみよう。', color:'#81C784'},
+          {title:'😊 きもちでいろをえらぼう', text:'「うれしい」→あかるいきいろ、「しずか」→やわらかいあお…いまのきもちにあういろはどれかな？かんじたままにえらんでOK！', color:'#CE93D8'},
+          {title:'🔲 すくないいろでまとめよう', text:'いろをたくさんつかうより、2〜3いろにしぼってかくとすっきりきれいにみえることがあるよ。まずはためしてみて！', color:'#FF7043'},
+        ],[
+          {title:'🌈 グラデーションにしよう', text:'ひとついろをだんだんうすくしていくと「グラデーション」になるよ。そらやみずをぬるときにためしてみよう！', color:'#4FC3F7'},
+          {title:'🖊️ アウトラインをかいてから', text:'まずえんぴつでかたちをかいて、そのなかをいろでぬりつぶしてみよう。はみだすのをおそれなくてOK！はみだしもあじになるよ。', color:'#FFD54F'},
+          {title:'🎨 いろをかさねてみよう', text:'かわいたいろのうえにべついろをかさねると、あたらしいいろがうまれるよ。あおのうえにきいろ→みどりになったりするんだ！', color:'#81C784'},
+        ],[
+          {title:'🌙 あかるいいろとくらいいろ', text:'えのなかに「あかるいところ」と「くらいところ」をつくると、りったいかんがでるよ。ひかりがあたっているところをあかるくぬってみよう！', color:'#CE93D8'},
+          {title:'🌸 おなじいろでもぬりかたでかわる', text:'ぎゅっとつよくぬるとこく、やさしくそっとぬるとうすくなるよ。ぬりかたをかえるだけでえのひょうじょうがかわるんだよ！', color:'#FF7043'},
+          {title:'🖌️ ふでのうごかしかたをかえよう', text:'スーッとまっすぐ、クルクル、トントン…ふでやクレヨンのうごかしかたをかえると、おなじいろでもちがうかんじになるよ！', color:'#4FC3F7'},
+        ],
+      ],
+    },
+
+    katachi: {
+      cheers: [
+        '✏️ かたちはれんしゅうするほどじょうずになるよ！',
+        '🔷 うまくかけなくてもそれがきみらしさだよ！',
+        '💪 ゆっくりていねいにかけばかならずうまくなるよ！',
+        '🌱 へたでもきにしない！つづけることがたいせつだよ！',
+      ],
+      ideas: [
+        'ふしぎなかたちののりもの🚀',
+        'くだものをリアルに🍎',
+        'じぶんのくつをかこう👟',
+        'すきなたべものをどアップで🍕',
+        'いろんなかたちのはっぱあつめ🍃',
+        'まるとさんかくとしかくだけでつくったえ🔺',
+        'おきにいりのどうぶつのかお🐼',
+      ],
+      sets: [
+        [
+          {title:'⭕ まるからはじめよう', text:'どんなものもまる・さんかく・しかくのくみあわせ！まずおおきな○をかいて、たしたりひいたりするとかたちになるよ。', color:'#FF7043'},
+          {title:'👁 よくみてゆっくりかこう', text:'かくものをじっくりみて、「いちばんとくちょうのあるぶぶん」だけまずかいてみよう。こまかいところはあとでOK！', color:'#4FC3F7'},
+          {title:'✍️ うすくかいてからなおそう', text:'さいしょはちからをいれずうすくかくと、あとでけしてなおせるよ。「したがき」っていうんだ。プロもみんなやってるよ！', color:'#FFD54F'},
+        ],[
+          {title:'📏 ちょくせんだけでかいてみよう', text:'まっすぐなせんだけをつかってえをかいてみよう。きょくせんがなくてもかっこいいえがかけるよ。ロボットやたてものにちょうせんしよう！', color:'#FF7043'},
+          {title:'🔲 はこをつみあげるように', text:'むずかしいかたちも、しかくいはこをいくつかかさねるイメージでかんがえるとかきやすくなるよ。ブロックをつむかんじでやってみて！', color:'#81C784'},
+          {title:'✂️ そとがわのせんだけかこう', text:'ものの「シルエット」（そとがわのかたち）だけをなぞるようにかいてみよう。なかみはあとから。まずりんかくだけでOK！', color:'#CE93D8'},
+        ],[
+          {title:'🤜 ちからをぬいてかこう', text:'ちからがはいりすぎるとせんがかたくなるよ。えんぴつをかるくもって、てをリラックスさせてかくとやわらかいせんになるよ。', color:'#4FC3F7'},
+          {title:'📐 めじるしをうってからかこう', text:'「ここにあたまがくる」「ここにあしがくる」とてんをうってからせんでつなぐと、バランスよくかけるよ！', color:'#FFD54F'},
+          {title:'🔄 まわしてみてみよう', text:'かいているとちゅうでかみをまわしてみよう。むずかしいかくどのせんも、かみをまわすとかきやすくなることがあるよ！', color:'#FF7043'},
+        ],[
+          {title:'🗃️ じつものをそのままうつそう', text:'かきたいものをめのまえにおいて、よくみながらかこう。「みながらかく」だけで、ぐっとじょうずにかけるよ！', color:'#81C784'},
+          {title:'✏️ なんどもなぞってみよう', text:'うまくかけないとおもったら、おなじせんをなんどもかるくなぞってみよう。すこしずつかたちがととのってくるよ。けしゴムをつかってもOK！', color:'#CE93D8'},
+          {title:'🎯 パーツにわけてかこう', text:'むずかしいかたちは、ちいさなパーツにわけて1つずつかこう。「あたま」「からだ」「て」「あし」とわけるとかきやすくなるよ！', color:'#FF7043'},
+        ],[
+          {title:'🖐 ゆびでなぞってみよう', text:'かくまえに、くうちゅうやつくえのうえでゆびでなぞってれんしゅうしてみよう。あたまとてにかたちをおぼえさせると、かみにかくときにうまくいくよ！', color:'#4FC3F7'},
+          {title:'📦 まずしかくでかいてみよう', text:'どんなものでもさいしょはしかくでかいてみよう。しかくからかたちをけずったりたしたりすると、おもったよりうまくかけるよ！', color:'#FFD54F'},
+          {title:'🌊 きょくせんをれんしゅうしよう', text:'かみのすみになみのせん・うずまき・Sのじをなんぼんかれんしゅうしてみよう。てがなれると、ほんばんのえでもきょくせんがうまくかけるよ！', color:'#81C784'},
+        ],
+      ],
+    },
+
+    hajime: {
+      cheers: [
+        '🚀 さいしょのいっぽさえふみだせばだいじょうぶ！',
+        '🌱 はじめることがいちばんたいせつだよ！',
+        '⚡ まずかみにえんぴつをあてるだけでOK！',
+        '🎯 かんがえすぎなくていい！とりあえずはじめよう！',
+      ],
+      ideas: [
+        '10ねんごのじぶんのへや🏠',
+        'もしそらをとべたらみえるけしき✈️',
+        'ひみつのちずをかこう🗺️',
+        'じぶんだけのオリジナルこっき🚩',
+        'まほうつかいのどうぐばこ🪄',
+        'きょうのきもちをえにしよう💭',
+        'すきなきせつのふうけい🍂',
+      ],
+      sets: [
+        [
+          {title:'📐 おおきさをきめよう', text:'まず「しゅやくはかみのどのあたりにかくか」だけきめてみよう。まんなかでも、すみっこでも、じぶんがすきなばしょでOK！', color:'#FF7043'},
+          {title:'✏️ まずりんかくだけかこう', text:'いろやこまかいところはあとまわし！さいしょはぜんたいのシルエット（そとがわのせん）だけをうすくかいてみよう。それだけでだいぶすすむよ。', color:'#CE93D8'},
+          {title:'🔢 じゅんばんをきめるとらくになる', text:'「おく→まえ」「おおきい→ちいさい」のじゅんにかくとまよいにくくなるよ。とおくのものからさきにかくのがコツ！', color:'#81C784'},
+        ],[
+          {title:'🖊️ まず1ぽんせんをひこう', text:'「よーい、スタート！」のきもちで、まずかみに1ぽんだけせんをひいてみよう。それだけでふしぎとつぎがかきたくなるよ！', color:'#FF7043'},
+          {title:'🗒️ メモするようにかこう', text:'じょうずにかこうとしなくていい！まずメモするようにかんたんにぜんたいをかいて、あとからていねいにしていけばOK。', color:'#4FC3F7'},
+          {title:'⏱️ 3ぷんだけやってみよう', text:'「3ぷんだけかく」ときめてスタートしよう。じかんをきめるとふしぎとてがうごくよ。おわったらつづきをやりたくなるはず！', color:'#FFD54F'},
+        ],[
+          {title:'🎯 しゅやくをひとつきめよう', text:'「このえでいちばんめだたせたいものはなに？」をひとつきめよう。しゅやくがきまると、まわりのはいちがしぜんにきまってくるよ。', color:'#CE93D8'},
+          {title:'✋ まずてをうごかそう', text:'かんがえすぎるとてがとまるよ。とりあえずかみになにかをかいてみよう。かいているうちにアイデアがでてくることがおおいよ！', color:'#FF7043'},
+          {title:'📦 ゾーンをわけよう', text:'かみを「うえ・した」「みぎ・ひだり」にわけて、どこになにをかくかだけきめてみよう。それだけでぐっとはじめやすくなるよ。', color:'#81C784'},
+        ],[
+          {title:'🌅 はいけいからぬってみよう', text:'そらやじめんなど、いちばんひろいところからいろをぬりはじめよう。はいけいがきまると、しゅやくをどこにかくかがみえてくるよ！', color:'#4FC3F7'},
+          {title:'📝 かんたんなせっけいずをかこう', text:'ほんばんのかみとはべつのかみに、かんたんなかたちだけかいてみよう。「こんなかんじにしよう」とイメージできるとはじめやすいよ！', color:'#FFD54F'},
+          {title:'🔑 いちばんかきたいぶぶんから', text:'ぜんたいではなく「ここだけはかきたい！」とおもうぶぶんからスタートしよう。すきなぶぶんからはじめるとたのしくてつづけられるよ！', color:'#CE93D8'},
+        ],[
+          {title:'🧩 パーツをきめてからかこう', text:'「なにがとうじょうするか」をまずかきだしてみよう。とうじょうするものがきまれば、それをどこにはいちするかかんがえるだけでOKだよ！', color:'#FF7043'},
+          {title:'🌿 しぜんのものをまねしよう', text:'き・はっぱ・くも・いし…しぜんにあるものはかくれんしゅうにぴったり！かたちがきまっていないから、すこしちがってもきにならないよ。', color:'#81C784'},
+          {title:'🏁 ゴールをきめてから', text:'「かんせいしたらどんなえになってほしい？」をさきにきめよう。ゴールがみえると、そこにむかってすすむだけになるよ！', color:'#4FC3F7'},
+        ],
+      ],
+    },
+
+    idea: {
+      cheers: [
+        '💡 アイデアはだしつづけるとかならずでてくるよ！',
+        '🌟 きみのあたまのなかにはすごいアイデアがかくれているよ！',
+        '🎲 まずはおもいついたことをなんでもかきだしてみよう！',
+        '🔥 アイデアがないときは、いろんなものをみてみよう！',
+      ],
+      ideas: [
+        'うごくどうぶつのせかい🦁',
+        'ロボットとにんげんがなかよしのみらい🤖',
+        'おかしでできたまち🍭',
+        'みずのなかのがっこう🐠',
+        'くものうえのゆうえんち☁️',
+        'ぜんぶがさかさまのくに🙃',
+        'じかんがとまったびじゅつかん🖼️',
+      ],
+      sets: [
+        [
+          {title:'🔀 ふたつをかけあわせよう', text:'「ねこ＋ロボット」「ケーキ＋うちゅう」みたいに、かんけいないものを2つくみあわせると、おもしろいアイデアがうまれるよ！', color:'#FF7043'},
+          {title:'🔭 おおきさをかえてみよう', text:'アリをゾウよりおおきくかいたら？ちいさなせかいをおおきくかいたら？おおきさをわざとかえるだけでふしぎなえになるよ。', color:'#4FC3F7'},
+          {title:'🌀 「もしも」でかんがえよう', text:'「もしもそらがみどりいろだったら？」「もしもさかながそらをとんでいたら？」「もしも」からアイデアをかんがえてみよう！', color:'#CE93D8'},
+        ],[
+          {title:'📝 おもったことをかきだそう', text:'えをかくまえに、おもいついたことばをなんでもかみにかいてみよう。ことばをみているうちに、えにしたいものがみつかるよ！', color:'#FF7043'},
+          {title:'🔁 いつもとはんたいにしよう', text:'「そらにあるさかな」「うみをおよぐとり」など、ふつうとはんたいのことをえにしてみよう。いがいなおもしろさがうまれるよ！', color:'#81C784'},
+          {title:'🎵 おんがくをきながらかんがえよう', text:'すきなおんがくをきながらめをとじて、あたまにうかんだいろやかたちをそのままかいてみよう。かんじたままでOK！', color:'#CE93D8'},
+        ],[
+          {title:'🌍 せかいのどこかをそうぞうしよう', text:'「みなみのしま」「きたのこおりのせかい」「さばくのまち」…いったことのないばしょをそうぞうして、そこにあるけしきをかいてみよう！', color:'#4FC3F7'},
+          {title:'👀 ものをよーくかんさつしよう', text:'えんぴつ、けしゴム、コップ…みのまわりのものをよーくみると、きづかなかったかたちやいろがみえてくるよ。それがアイデアのたねになるよ！', color:'#FFD54F'},
+          {title:'🦸 しゅじんこうをつくろう', text:'「どんなキャラクターがしゅじんこうのえにしよう？」とかんがえてみよう。なまえ・すきなもの・とくいなことをきめると、えのアイデアがどんどんでてくるよ！', color:'#FF7043'},
+        ],[
+          {title:'🗺️ ちずをかいてみよう', text:'じぶんのいえのまわり、がっこうへのみち、ゆめのまち…ちずにするとそれだけでえになるよ。ばしょやたてものをじゆうにたしてみよう！', color:'#81C784'},
+          {title:'📅 1ねんのできごとをえに', text:'はる・なつ・あき・ふゆのいちばんのおもいでをひとつずつかいてみよう。4コマみたいにならべると、すてきなさくひんになるよ！', color:'#CE93D8'},
+          {title:'🌊 かんじたことをそのまま', text:'「きょうたのしかったこと」「さいきんきになること」をそのままえにしてみよう。きもちをえにするのもりっぱなアートだよ！', color:'#4FC3F7'},
+        ],[
+          {title:'🔬 ちいさなせかいをかこう', text:'アリのめせんでみたせかい、はっぱのうえのみずてき、つちのなかのむし…ちいさないきもののせかいをおおきくかいてみよう！', color:'#FF7043'},
+          {title:'🎪 ゆめのばしょをつくろう', text:'「こんなばしょがあったらいいな」というゆめのばしょをじゆうにかこう。ゆうえんちでも、おかしのいえでも、うちゅうのカフェでもOK！', color:'#FFD54F'},
+          {title:'👥 とうじょうじんぶつをふやそう', text:'ひとりのしゅじんこうにともだちやなかまをくわえてみよう。なかまがふえると、えのなかにストーリーがうまれておもしろくなるよ！', color:'#81C784'},
+        ],
+      ],
+    },
+
+    zannen: {
+      cheers: [
+        '😊 うまくいかないのはせいちょうしているしょうこ！',
+        '💪 しっぱいしただけじょうずになっているよ！',
+        '🌱 「なんかちがう」とかんじることじたいがすごいさいのうだよ！',
+        '🔥 そのモヤモヤがえをよくしていくちからになるよ！',
+      ],
+      ideas: [
+        'まちがいからうまれたえ🎭',
+        'もういちどチャレンジするゆうき🔥',
+        'なんかちがう…をなおしたえ🔧',
+        'あえてへたにかいたえ🖍️',
+        'きもちをそのままいろにしたえ🎨',
+        'やりなおしてよかったえ⭐',
+        'しっぱいがたからになったえ💎',
+      ],
+      sets: [
+        [
+          {title:'👀 すこしはなれてみてみよう', text:'えからすこしはなれてみると、ぜんたいのバランスがみえてくるよ。ちかくではわからないことも、はなれるとみえてくるよ。', color:'#FF7043'},
+          {title:'🎨 いろをたしてみよう', text:'「なんかちがう」とおもったら、いろをたしたりかさねたりしてみよう。ひといろたすだけでガラッとかわることがよくあるよ！', color:'#4FC3F7'},
+          {title:'✂️ いちぶぶんにちゅうもくしよう', text:'ぜんたいがちがうとかんじても、「ここだけはいい！」というぶぶんがあるはず。そこをちゅうしんにすこしずつかえていこう。', color:'#81C784'},
+        ],[
+          {title:'🔄 さかさまにしてみよう', text:'えをうえしたさかさまにしてみてみよう。ちがうみえかたになって、どこをなおせばいいかがみつかることがあるよ！', color:'#CE93D8'},
+          {title:'📸 しゃしんをとってみてみよう', text:'えをカメラやタブレットでしゃしんにとって、がめんでみてみよう。じつぶつとはちがってみえて、きづかなかったことがわかるよ。', color:'#FF7043'},
+          {title:'🖊️ せんをなぞりなおしてみよう', text:'「なんかちがう」とかんじるせんをそっとなぞりなおしてみよう。すこしだけかたちがかわるだけで、ぐっとよくなることがあるよ。', color:'#FFD54F'},
+        ],[
+          {title:'💬 だれかにみせてみよう', text:'ともだちやせんせいにみせて「どうおもう？」ときいてみよう。じぶんではきづかない「いいところ」をおしえてもらえることがあるよ！', color:'#81C784'},
+          {title:'✨ あえてかえてみよう', text:'「ちがうな」とおもうところを、おもいきってちがういろやかたちにかえてみよう。しっぱいをなおすより、あたらしいものにするつもりでやってみて！', color:'#FF7043'},
+          {title:'🌟 タイトルをつけてみよう', text:'いまのえにタイトル（なまえ）をつけてみよう。タイトルをきめると「このえはこういうえなんだ」ときもちがさだまって、なおすところがみえてくるよ。', color:'#4FC3F7'},
+        ],[
+          {title:'🌈 ぜんたいのいろをみなおそう', text:'ぜんたいをみて「あかるすぎる」「くらすぎる」とかんじたら、はんたいのいろをすこしくわえてみよう。バランスがとれるとぐっとよくなるよ！', color:'#CE93D8'},
+          {title:'🔲 よはくをつくってみよう', text:'えがごちゃごちゃしているとかんじたら、いくつかをけして「なにもないぶぶん」をつくってみよう。すっきりしてみえるよ！', color:'#FF7043'},
+          {title:'🎯 しゅやくをめだたせよう', text:'「いちばんみてほしいもの」をおおきくしたり、あかるいいろにしたりしてめだたせよう。しゅやくがはっきりするとえがひきしまるよ！', color:'#81C784'},
+        ],[
+          {title:'🖌️ ふでのうごかしかたをかえよう', text:'おなじいろでも、せんのひきかた・てん・うずまきなど、いろんなふでのうごかしかたをためしてみよう。かんじがかわって「これだ！」がみつかるかも。', color:'#4FC3F7'},
+          {title:'📐 バランスをたしかめよう', text:'かみのまんなかにせんをひくイメージで、さゆうやうえしたのバランスをたしかめてみよう。かたよっていたら、はんたいがわにものをたしてみよう。', color:'#FFD54F'},
+          {title:'💭 なにがちがうかことばにしよう', text:'「なんかちがう」をもうすこしくわしくことばにしてみよう。「いろがくらい」「かたちがおかしい」など、りゆうがわかるとなおしやすくなるよ！', color:'#CE93D8'},
+        ],
+      ],
+    },
+  };
+
+  const cheerByMood = {
+    wakatanai: 'わからなくてあたりまえ！いっしょにかんがえよう💪',
+    sukoshi:   'すこしわかってるって、もうはんぶんできてるよ！✨',
+    tanoshii:  'そのたのしさをそのままえにしよう！🎉',
+    kowai:     'しっぱいしてもだいじょうぶ！ずこうにせいかいはないよ😊',
+  };
+
+  const base = db[probId] || db['nani'];
+  return { cheer: cheerByMood[moodId] || R(base.cheers), hints: R(base.sets), randomIdea: R(base.ideas) };
+}
+
+// ===== ヒント描画 =====
+const extraIdeas = [
+  'にじいろのどうぶつ🌈', 'そらからおちてきたもの🚀', 'ふしぎなたべもの🍭',
+  '100ねんごのまち🏙️', 'ちいさないきもの🐛', 'うみのそこのひみつ🐚',
+  'マジックのようなはな🌸', 'うちゅうのいきもの👽', 'たのしいのりもの🚂',
+  'おどるやさい🥕', 'ゆめのなかのおうち🏠', 'じぶんだけのヒーロー🦸',
+  'きせつのかぜ💨', 'ふしぎなとびら🚪', 'もりのおまつり🎉',
+  'うごくたてもの🏃', 'さかさまのせかい🙃', 'くだもののくに🍇',
+  'ないしょのひみつきち🏕️', 'せかいでいちばんおおきなケーキ🎂',
+  'じかんがとまったまち⏰', 'こころのなかのいろ🎨', 'うみをおよぐそら☁️',
+  'てのひらのうちゅう🌌', 'なかよし3ひきのどうぶつ🐘🐬🦒',
+];
+let ideaIdx = Math.floor(Math.random() * extraIdeas.length);
+
+function renderHints(data) {
+  const colors = ['#FF7043','#4FC3F7','#81C784','#CE93D8','#FFD54F'];
+  let html = '';
+
+  // 応援
+  html += '<div class="cheer-box"><div class="cheer-emoji">⭐</div>'
+        + '<div class="cheer-text">' + data.cheer + '</div></div>';
+
+  // ヒント（titleとtextはrubyタグを含むのでinnerHTMLで出力）
+  html += '<p class="section-title" style="margin-top:28px;">💡 こんなふうにしてみよう</p><div class="hints-list">';
+  data.hints.forEach((h, i) => {
+    const col = h.color || colors[i];
+    html += '<div class="hint-card" style="animation-delay:' + (0.1+i*0.1) + 's" onclick="toggleHint(this)">'
+          + '<div class="hint-num" style="background:' + col + '20;color:' + col + '">' + (i+1) + '</div>'
+          + '<div class="hint-body">'
+          + '<div class="hint-title">' + h.title + '</div>'
+          + '<div class="hint-text">'  + h.text  + '</div>'
+          + '<div class="hint-toggle">▼ くわしくみる</div>'
+          + '</div></div>';
+  });
+  html += '</div>';
+
+  // ランダムお題
+  html += '<p class="section-title" style="margin-top:28px;">🎲 ランダムおだい</p>'
+        + '<div class="random-card">'
+        + '<div class="rcard-label">✨ こんなテーマはどう？</div>'
+        + '<div class="rcard-content" id="idea-text">' + data.randomIdea + '</div>'
+        + '<button class="rcard-btn" onclick="shuffleIdea()">🔀 ほかのおだいをみる</button>'
+        + '</div>';
+
+  document.getElementById('hints-container').innerHTML = html;
+}
+
+function toggleHint(el) {
+  el.classList.toggle('opened');
+  el.querySelector('.hint-toggle').textContent =
+    el.classList.contains('opened') ? '▲ とじる' : '▼ くわしくみる';
+}
+
+function shuffleIdea() {
+  const el = document.getElementById('idea-text');
+  if (!el) return;
+  ideaIdx = (ideaIdx + 1) % extraIdeas.length;
+  el.textContent = extraIdeas[ideaIdx];
+}
+</script>
+</body>
+</html>
